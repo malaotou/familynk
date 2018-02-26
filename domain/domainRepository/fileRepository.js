@@ -22,6 +22,7 @@ var fileRepository = {
             if (postFileInfo.files != undefined && postFileInfo.files != null) {
                 var path = postFileInfo.files.file.path;
                 var destPath = config.file.path;
+                console.log(destPath,'destPath');
                 fs.exists(destPath, ext => {
                     if (!ext) {
                         fs.mkdir(destPath, err => {
