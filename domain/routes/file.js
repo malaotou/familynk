@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 Get all first level related User
 */
 app.post('/add', multipartMiddleware, function (req, res) {
+  console.log('uploadfile');
   fileRepository.createFile(req)
     .then(file => {
 
