@@ -173,9 +173,10 @@ var fileRepository = {
 
 function SaveFile(filename, destPath, sourcePath) {
     return new Promise((resolve, reject) => {
-        var destFile = destPath + '\\' + filename;
+        var destFile = destPath + '/' + filename;
         var source = fs.createReadStream(sourcePath);
         var dest = fs.createWriteStream(destFile);
+        console.log(dest,'filal file name ')
         source.pipe(dest);
         source.on('end', function () {
             fs.unlinkSync(sourcePath);
