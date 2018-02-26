@@ -23,8 +23,8 @@ app.use(bodyParser.json());
 /*
 Get all first level related User
 */
-app.get('',(req,res)=>{
-  res.end("file api works")
+app.get('/', function (req, res) {
+  res.send('123')
 })
 app.post('/add', multipartMiddleware, function (req, res) {
   console.log('uploadfile');
