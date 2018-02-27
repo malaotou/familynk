@@ -26,11 +26,15 @@ Get all first level related User
 app.get('/', function (req, res) {
   res.send('123')
 })
+app.post('/uuid', function (req, res) {
+  console.log(uuid())
+  util.sendResponse(res, true, 'sucess', uuid())
+})
 app.post('/add', multipartMiddleware, function (req, res) {
   console.log('uploadfile');
   fileRepository.createFile(req)
     .then(file => {
-      console.log(file,'file created successfully');
+      console.log(file, 'file created successfully');
       // 创建文件信息。
       var fileinfo = Object.assign({}, {
         src: config.file.rooturl + file,
