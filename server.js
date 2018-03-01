@@ -34,16 +34,8 @@ global.appRoot = path.resolve(__dirname);
 app.use(express.json({
   limit: '50mb'
 }));
-
-//app.use('/file',express.static(path.join(__dirname,'upload/')));
-app.use('/file', express.static("C:\\family\\"));
-// app.all('*', function(req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization");
-//   // res.header("Content-Type", "application/json;charset=utf-8");
-//   next();
-// });
-app.use('/file', express.static(path.join(__dirname, 'upload/')));
+//app.use('/file', express.static("C:\\family\\"));
+app.use('/file', express.static(config.path));
 
 
 app.get('/', function (req, res) {

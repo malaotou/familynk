@@ -1,3 +1,3 @@
 var mongo = require('mongoose');
-mongo.connect('mongodb://192.168.50.235/familynk');
+mongo.connect('mongodb://127.0.0.1/familynk');
 global.db = mongo
