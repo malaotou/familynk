@@ -31,7 +31,7 @@ module.exports={
             grant_type:'authorization_code',
     },
     file:{
-        path:'c:/family',
+        path:'/home/familyimg/',
         rooturl:"https://orangeexperience.com/file/"
     }
 }
