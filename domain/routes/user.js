@@ -33,6 +33,19 @@
           console.log(err);
         })
     })
+    app.post('/authV2', function (req, res) {
+      var uuid = req.body.uuid;
+      userRepository.getUserbyWeChatId({
+        uuid: uuid
+        })
+        .then(data => {
+          util.sendResponse(res, data.sucess, data.message, data.data);
+        })
+        .catch(err => {
+          util.sendResponse(res, false, err, null);
+          console.log(err);
+        })
+    })
 
     /*
      Create User Info

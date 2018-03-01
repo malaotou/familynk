@@ -18,7 +18,10 @@ var UserSchema = new Schema({
     province: String,
     gender: String,
     country: String,
-    birthyear: String
+    birthyear: String,
+    uuid: String,
+    creator: String,
+    firstlogiin: String
 })
 
 var User = db.model('User', UserSchema);

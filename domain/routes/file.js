@@ -14,6 +14,7 @@ var fileRepository = require('../domainRepository/fileRepository');
 var moment = require('moment');
 var userRepository = require('../domainRepository/userRepository');
 var relation = require('../domainRepository/relationRepository');
+var albumlog = require('../domainRepository/albumreadlogRepository');
 var async = require('async');
 var _ = require('lodash');
 app.use(bodyParser.urlencoded({
@@ -23,18 +24,10 @@ app.use(bodyParser.json());
 /*
 Get all first level related User
 */
-app.get('/', function (req, res) {
-  res.send('123')
-})
-app.post('/uuid', function (req, res) {
-  console.log(uuid())
-  util.sendResponse(res, true, 'sucess', uuid())
-})
 app.post('/add', multipartMiddleware, function (req, res) {
-  console.log('uploadfile');
   fileRepository.createFile(req)
     .then(file => {
-      console.log(file, 'file created successfully');
+
       // 创建文件信息。
       var fileinfo = Object.assign({}, {
         src: config.file.rooturl + file,
@@ -57,7 +50,16 @@ app.post('/add', multipartMiddleware, function (req, res) {
       util.sendResponse(res, false, err, null);
     })
 });
-
+app.post('/addavatar', multipartMiddleware, function (req, res) {
+  fileRepository.createFile(req)
+    .then(file => {
+      util.sendResponse(res, true, 'sucess', config.file.rooturl + file);
+    })
+    .catch(err => {
+      console.log(err);
+      util.sendResponse(res, false, err, null);
+    })
+});
 app.post('/recentFile', function (req, res) {
   var uid = req.body.uid;
   if (uid) {
@@ -68,14 +70,17 @@ app.post('/recentFile', function (req, res) {
     util.sendResponse(res, resData.sucess, resData.message, resData.data)
   }
 });
-
+app.post('/uuid', function (req, res) {
+  console.log(uuid())
+  util.sendResponse(res, true, 'sucess', uuid())
+})
 /*
  Get Specific File By userid
 */
 app.post('', function (req, res) {
 
     photo.find({
-        uid: req.body.uid //req.body.uid
+        uuid: req.body.uuid //req.body.uid
       }).sort({
         date: -1
       })
@@ -108,5 +113,30 @@ app.post('', function (req, res) {
       }
     )
   })
+
+app.get('/test', function (req, res) {
+  albumlog.createHis({
+    uuid: '////',
+    albumid: '\\\\',
+  }).then(data => {
+    console.log(data);
+  })
+})
+app.post('/readlogCreate', function (req, res) {
+  fileRepository.getRecentPhotV2(req.body.uuid)
+    .then(data => {
+      if (data.data.length > 0) {
+        albumlog.createHis({
+          uuid: req.body.uuid,
+          albumuuid: data.data[0].albumuuid
+        }).then(data2 => {
+          console.log(data2)
+        })
+      } else {
+
+      }
+      util.sendResponse(res,true,'sucess',null);
+    })
+})
 
 module.exports = app;

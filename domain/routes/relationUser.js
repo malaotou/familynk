@@ -3,12 +3,13 @@ var md5 = require('md5');
 var apiRoutes = express.Router();
 var app = express();
 var bodyParser = require('body-parser');
-
+var uuid = require('uuid/v4');
 var user = require('../domainModel/user');
 var relation = require('../domainModel/relateionUser');
 var relationRepository = require('../domainRepository/relationRepository');
 var userRepository = require('../domainRepository/userRepository');
 var fileRepository = require('../domainRepository/fileRepository');
+var readLogRepository = require('../domainRepository/albumreadlogRepository');
 var util = require('../../utils/utils');
 var moment = require('moment');
 var async = require('async');
@@ -43,9 +44,11 @@ Get all first level related User
 app.post('/relation', function (req, res) {
 
   if (req.body != null) {
-    var uid = req.body.uid
+    var uid = req.body.uid;
+    var uuid = req.body.uuid;
     var userinfo = {
-      uid: uid
+      uid: uid,
+      uuid: uuid
     }
     // 获取关联用户信息，从relationUser 表
     relationRepository.getRelationUser(userinfo).then(data => {
@@ -62,7 +65,8 @@ app.post('/relation', function (req, res) {
               isLink: node.isLink,
               linkid: node.linkid,
               birthyear: linkData.birthyear,
-              date: linkData.date
+              date: linkData.date,
+              uuidlink: node.uuidlink
             });
           })
         } else {
@@ -75,7 +79,8 @@ app.post('/relation', function (req, res) {
             isLink: node.isLink,
             linkid: node.linkid,
             birthyear: node.birthyear,
-            date: node.date
+            date: node.date,
+            uuidlink: node.uuidlink
           });
         }
 
@@ -88,17 +93,115 @@ app.post('/relation', function (req, res) {
     util.sendResponse(res, false, '参数不能为空', null);
   }
 })
+app.post('/relationV2', function (req, res) {
 
+  if (req.body != null) {
+    var uid = req.body.uid;
+    var uuid = req.body.uuid;
+    var userinfo = {
+      uid: uid,
+      uuid: uuid
+    }
+    // 获取关联用户信息，从relationUser 表
+    relationRepository.getRelationUser(userinfo).then(data => {
+      var rtn = [];
+      async.mapSeries(data.data, function (node, cb) {
+        getRelationDataV2(node).then(linkData => {
+          fileRepository.getRecentPhotV2(node.linkid)
+            .then(photo => {
+              if (photo.data.length > 0) { // 存在最新文件
+                readLogRepository.getHis({
+                  uuid: node.linkid,
+                  albumuuid: photo.data[0].albumuuid
+                }).then(data2 => {
+                  console.log(data2);
+                  if (data2 == null) { // 未查看相关信息，读取图片信息
+                    cb(null, {
+                      name: linkData.name,
+                      relation: node.relation,
+                      birth: linkData.birth,
+                      address: linkData.address,
+                      nationality: linkData.nationality,
+                      isLink: node.isLink,
+                      linkid: node.linkid,
+                      birthyear: linkData.birthyear,
+                      date: linkData.date,
+                      uuidlink: node.uuidlink,
+                      avatarUrl: linkData.avatarUrl,
+                      recent: photo.data[0].images[0].src
+                    });
+                  } else {
+                    cb(null, {
+                      name: linkData.name,
+                      relation: node.relation,
+                      birth: linkData.birth,
+                      address: linkData.address,
+                      nationality: linkData.nationality,
+                      isLink: node.isLink,
+                      linkid: node.linkid,
+                      birthyear: linkData.birthyear,
+                      date: linkData.date,
+                      uuidlink: node.uuidlink,
+                      avatarUrl: linkData.avatarUrl,
+                      recent: ''
+                    });
+                  }
+                })
+              } else { // 不存在最新文件
+                cb(null, {
+                  name: linkData.name,
+                  relation: node.relation,
+                  birth: linkData.birth,
+                  address: linkData.address,
+                  nationality: linkData.nationality,
+                  isLink: node.isLink,
+                  linkid: node.linkid,
+                  birthyear: linkData.birthyear,
+                  date: linkData.date,
+                  uuidlink: node.uuidlink,
+                  avatarUrl: linkData.avatarUrl,
+                  recent: ''
+                });
+              }
+
+            })
+        })
+      }, function (err, results) {
+        util.sendResponse(res, data.sucess, data.message, _.sortBy(results, 'date'));
+      });
+    })
+  } else {
+    util.sendResponse(res, false, '参数不能为空', null);
+  }
+})
 /*
   保存对应的人员关系，及邀请人的信息,这里不产生关联关系。
 */
 app.post('/add', function (req, res) {
+  var tmpuuid = uuid();
   // 处理邀请用户信息
+  const weid = uuid();
   var relationInfo = Object.assign({}, req.body.relationUserinfo, {
-    date: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss')
+    date: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+    linkid: tmpuuid,
+    creator: req.body.relationUserinfo.uuidlink
   });
   relationRepository.addRelation(relationInfo) // 创建关系
     .then(data => {
+      // Create Tmp User
+      userRepository.createNewUser({
+        weid: weid,
+        avatarUrl: relationInfo.avatarUrl,
+        gender: relationInfo.gender,
+        address: relationInfo.address,
+        nationality: relationInfo.nationality,
+        birth: relationInfo.birth,
+        birthyear: relationInfo.birthyear,
+        uid: '',
+        uuid: tmpuuid,
+        name: relationInfo.name,
+        creator: req.body.relationUserinfo.uuidlink
+      })
       util.sendResponse(res, data.sucess, data.message, data.data);
     }).catch(err => {
       util.sendResponse(res, false, err, null);
@@ -185,6 +288,18 @@ function getRelationData(relation) {
     })
   })
 }
+
+// relation data;  获取关系信息，已经产生关联的用户
+function getRelationDataV2(relation) {
+  return new Promise((resolve, reject) => {
+    user.findOne({
+      uuid: relation.linkid
+    }).then(data => {
+      resolve(data);
+    })
+  })
+}
+
 
 /*
  获取最新的图片信息

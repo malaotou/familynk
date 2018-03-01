@@ -22,7 +22,6 @@ var fileRepository = {
             if (postFileInfo.files != undefined && postFileInfo.files != null) {
                 var path = postFileInfo.files.file.path;
                 var destPath = config.file.path;
-                console.log(destPath,'destPath');
                 fs.exists(destPath, ext => {
                     if (!ext) {
                         fs.mkdir(destPath, err => {
@@ -45,35 +44,17 @@ var fileRepository = {
     },
     savedbFileInfo(fileinfo) {
         return new Promise((resolve, reject) => {
-
-            var data = db.models.Photo.findOne({
-                uid: fileinfo.uid,
-                uuid: fileinfo.uuid
-            }, (err, result) => {
-                console.log(err, result)
-            })
-
-            // db.models.Photo.findOneAndUpdate({
-            //     uid: fileinfo.uid,
-            //     uuid: fileinfo.uuid
-            // }, {
-            //     $addToSet: {
-            //         images: {
-            //             src: fileinfo.src,
-            //         }
-            //     }
-            // }).exec();
-            // resolve({
-            //     sucess: true,
-            //     msg: null
-            // });
-
-
+            // var data = db.models.Photo.findOne({
+            //     uuid: fileinfo.uuid,
+            //     albumuuid: fileinfo.albumuuid
+            // }, (err, result) => {
+            //     console.log(err, result)
+            // })
             photo.findOne({
-                uid: fileinfo.uid,
-                uuid: fileinfo.uuid
+                uuid: fileinfo.uuid,
+                albumuuid: fileinfo.albumuuid
             }).then(data => {
-                
+
                     // 创建 
                     if (data == null) {
                         var newPhoto = new photo(fileinfo);
@@ -89,8 +70,8 @@ var fileRepository = {
                     // 更新
                     else {
                         db.models.Photo.findOneAndUpdate({
-                            uid: fileinfo.uid,
-                            uuid: fileinfo.uuid
+                            uuid: fileinfo.uuid,
+                            albumuuid: fileinfo.albumuuid
                         }, {
                             $addToSet: {
                                 images: {
@@ -122,17 +103,17 @@ var fileRepository = {
                 })
         })
     },
-    getRecentPhotV2(uid) {
+    getRecentPhotV2(uuid) {
         return new Promise((resolve, reject) => {
             photo.aggregate(
                     [{
                             $match: {
-                                uid: uid
+                                uuid: uuid
                             }
                         },
                         {
                             $sort: {
-                                data: 1
+                                date: -1
                             }
                         },
                         {
@@ -173,10 +154,9 @@ var fileRepository = {
 
 function SaveFile(filename, destPath, sourcePath) {
     return new Promise((resolve, reject) => {
-        var destFile = destPath + '/' + filename;
+        var destFile = destPath + '\\' + filename;
         var source = fs.createReadStream(sourcePath);
         var dest = fs.createWriteStream(destFile);
-        console.log(dest,'filal file name ')
         source.pipe(dest);
         source.on('end', function () {
             fs.unlinkSync(sourcePath);

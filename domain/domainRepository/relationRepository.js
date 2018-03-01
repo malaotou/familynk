@@ -13,10 +13,7 @@ var relationRepository = {
     getRelationUser(userInfo) {
         return new Promise((resolve, reject) => {
             relation.find({
-                    uid: userInfo.uid
-                })
-                .sort({
-                    name: -1
+                    uuidlink: userInfo.uuid
                 })
                 .then(
                     data => {

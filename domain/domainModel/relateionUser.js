@@ -10,7 +10,9 @@ var RelationSchema=new Schema({
     name:String,
     isLink:Boolean,
     linkid:String,
-    birthyear:String
+    uuidlink:String,
+    birthyear:String,
+    creator:String
     // detail:{
     //     age:Number,
     //     sex:Number,

@@ -28,7 +28,6 @@ var userRepository = {
     createNewUser(userinfo) {
         return new Promise((resolve, reject) => {
             var newUser = new user(userinfo);
-            console.log('userinfo==============', userinfo)
             newUser.save().then((data) => {
                     resolve({
                         sucess: true,
@@ -63,7 +62,7 @@ var userRepository = {
             try {
                 // user.update({$set:{name:"XXXx"},{uid:userinfo.uid},})
                 db.models.User.findOneAndUpdate({
-                    uid: userinfo.uid
+                    uuid: userinfo.uuid
                 }, {
                     $set: {
                         "name": userinfo.name,
@@ -72,6 +71,8 @@ var userRepository = {
                         "birthyear": (userinfo.birth != null) ? userinfo.birth.substring(0, 4) : "",
                         "address": userinfo.address,
                         "nationality": userinfo.nationality,
+                        "avatarUrl":userinfo.avatarUrl,
+                        "firstlogiin":"false"
                     }
                 }).exec();
                 resolve({
@@ -137,7 +138,13 @@ function updateUser(userinfo) {
 function checkUserExists(userinfo) {
     return new Promise((resolve, reject) => {
         user.findOne({
-                uid: userinfo.uid
+                $or: [{
+                        uid: userinfo.uid
+                    },
+                    {
+                        uuid: userinfo.uuid
+                    }
+                ]
             }).sort({
                 uid: -1
             })

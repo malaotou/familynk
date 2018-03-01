@@ -4,6 +4,7 @@
     var bodyParser = require('body-parser');
     var request = require('request');
     var utils = require('../../utils/utils');
+    var uuid = require('uuid/v4');
     var userRepository = require('../domainRepository/userRepository');
     app.use(bodyParser.urlencoded({
         extended: false
@@ -35,11 +36,12 @@
                         uid: (JSON.parse(body)).openid
                     })
                     .then(data => {
-                        console.log(body, 'body');
+                        //console.log(body, 'body');
                         req.body.uid = (JSON.parse(body)).openid;
                         if (!data.data || data.data.length == 0) {
                             // 未注册，
-                            userRepository.createNewUser(req.body)
+                            var modifydata=Object.assign({},req.body,{uuid:uuid()})
+                            userRepository.createNewUser(modifydata)
                                 .then(data => {
                                     utils.sendResponse(res, true, 'sucess', body);
                                 })
