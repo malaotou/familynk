@@ -135,6 +135,20 @@ var relationRepository = {
             })
         })
 
+    },
+    updateRelation(relation) {
+        return new Promise((resolve, reject) => {
+            db.models.Relation.findOneAndUpdate({
+                _id: relation.id
+            }, {
+                $set: {
+                    linkid: relation.uuid
+                }
+            }).then(data => {
+                resolve(data)
+            }).catch(
+                err => reject(err));
+        })
     }
 }
 

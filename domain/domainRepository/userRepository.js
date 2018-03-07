@@ -71,8 +71,8 @@ var userRepository = {
                         "birthyear": (userinfo.birth != null) ? userinfo.birth.substring(0, 4) : "",
                         "address": userinfo.address,
                         "nationality": userinfo.nationality,
-                        "avatarUrl":userinfo.avatarUrl,
-                        "firstlogiin":"false"
+                        "avatarUrl": userinfo.avatarUrl,
+                        "firstlogiin": "false"
                     }
                 }).exec();
                 resolve({
@@ -95,6 +95,38 @@ var userRepository = {
         return new Promise((resolve, reject) => {
             user.find({
                     uid: uid
+                })
+                .then(data => {
+                    resolve({
+                        sucess: true,
+                        data: data,
+                        message: 'sucess'
+                    });
+                })
+        })
+    },
+    deleteUser(userinfo) {
+
+        return db.models.User.deleteOne({
+            uuid: userinfo.uuid
+        })
+        // return new Promise((resolve, reject) => {
+        //     try {
+        //         db.models.User.deleteOne({
+        //             uuid: userinfo.uuid
+        //         }).exec()
+        //         resolve()
+
+        //     } catch (err) {
+        //         reject(err);
+        //     }
+
+        // })
+    },
+    getuserById(uuid) {
+        return new Promise((resolve, reject) => {
+            user.findOne({
+                    uuid: uuid
                 })
                 .then(data => {
                     resolve({

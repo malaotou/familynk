@@ -14,27 +14,6 @@ var util = require('../../utils/utils');
 var moment = require('moment');
 var async = require('async');
 var _ = require('lodash');
-/*
-Get all first level related User
-*/
-// app.get('', function (req, res) {
-//   var u = {
-//     weid: 123, // RelatedId,
-//     uid: 123,
-//     relation: 'String',
-//     relationId: 'String', // id_id_id_id
-//   }
-//   var relationUser = new relation(u);
-//   relationUser.save().then(() => console.log('meow'));
-
-//   relation.find(null).then(data => {
-//     console.log(data);
-//     res.send({
-//       data
-//     });
-//     res.end();
-//   });
-// });
 
 /*
  Get Specific User By User Id
@@ -216,6 +195,46 @@ app.post('/delete', function (req, res) {
   }
 });
 
+/*
+1、完善个人信息，修复关系。
+2、删除历史的个人信息。
+3、 前端重新登录。
+*/
+app.post('/confirmV2', function (req, res) {
+
+  //userRepository.updateUserInfo(req.body.userinfo).then(data=>console.log(data));
+  if (req.body.uuid != null && req.body.userinfo != null && req.body.relationid != null) {
+    //   relationRepository.updateRelation({
+    //       id: req.body.relationid,
+    //       uuid: 'xxxxxxxxxxxxxxxxxx'
+    //     })
+    //     .then(data => {
+    //       relationRepository.addRelation({
+    //         uid:123456
+    //       }).then(data => {
+
+    //       })
+    //     })
+    //完善个人信息
+    userRepository.updateUserInfo(req.body.userinfo)
+      .then(data => {
+        userRepository.deleteUser({
+            uuid: req.body.uuid
+          })
+          .then(data => {
+            relationRepository.updateRelation({
+                id: req.body.relationid
+              })
+              .then(data => {
+                //relationRepository.addRelation({}).then(data => {
+                util.sendResponse(res, true, 'sucess', data)
+                //})
+              })
+          })
+      })
+
+  }
+});
 
 /*
   受邀请方确认邀请的关系，在受邀请方，确认是，确认邀请方发送的关系，并创建反向的对应关系。
@@ -278,6 +297,37 @@ app.post('/getdetail', function (req, res) {
   }
 })
 
+app.post('/getInviteation', function (req, res) {
+  relationRepository.getrelationbyid(req.body.id).then(
+      data => {
+        userRepository.getuserById(data.data.uuidlink).then(
+          sender => {
+            userRepository.getuserById(data.data.linkid).then(tmpuser => {
+              var rtn = Object.assign({}, {
+                sender: sender.data
+              }, {
+                receiver: tmpuser.data,
+                relation: data.data.relation
+              });
+              util.sendResponse(res, true, 'sucess', rtn);
+            })
+            // var rtn = Object.assign({}, {
+            //   relaton: data.data.relation
+            // }, {
+            //   username: user.data.name
+            // })
+
+          }
+        ).catch(err => {
+          util.sendResponse(res, false, err, null)
+        })
+
+      })
+    .catch(err => {
+      util.sendResponse(res, false, err, null)
+    })
+})
+
 // relation data;  获取关系信息，已经产生关联的用户
 function getRelationData(relation) {
   return new Promise((resolve, reject) => {
@@ -299,8 +349,6 @@ function getRelationDataV2(relation) {
     })
   })
 }
-
-
 /*
  获取最新的图片信息
 */
