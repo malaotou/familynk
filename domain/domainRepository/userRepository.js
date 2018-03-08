@@ -108,7 +108,8 @@ var userRepository = {
     deleteUser(userinfo) {
 
         return db.models.User.deleteOne({
-            uuid: userinfo.uuid
+            uuid: userinfo.uuid,
+            firstlogiin:'true'
         })
         // return new Promise((resolve, reject) => {
         //     try {
