@@ -96,7 +96,7 @@ app.post('/relationV2', function (req, res) {
                   console.log(data2);
                   if (data2 == null) { // 未查看相关信息，读取图片信息
                     cb(null, {
-                      id:data.data._id,
+                      id:data.data.id,
                       name: linkData.name,
                       relation: node.relation,
                       birth: linkData.birth,
@@ -112,7 +112,7 @@ app.post('/relationV2', function (req, res) {
                     });
                   } else {
                     cb(null, {
-                      id:data.data._id,
+                      id:data.data.id,
                       name: linkData.name,
                       relation: node.relation,
                       birth: linkData.birth,
@@ -130,7 +130,7 @@ app.post('/relationV2', function (req, res) {
                 })
               } else { // 不存在最新文件
                 cb(null, {
-                  id:data.data._id,
+                  id:data.data.id,
                   name: linkData.name,
                   relation: node.relation,
                   birth: linkData.birth,
