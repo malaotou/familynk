@@ -95,16 +95,15 @@ var relationRepository = {
     },
     removeRelation(relatonId, OpUser) {
         return new Promise((resolve, reject) => {
-            relation.find({})
-                .then(data => {
-                    relation.remove(data)
-                        .then(da => {
-                            resolve({
-                                sucess: true,
-                                data: data,
-                                message: 'sucess'
-                            })
-                        })
+            relation.remove({
+                    _id: relationid
+                })
+                .then(da => {
+                    resolve({
+                        sucess: true,
+                        data: data,
+                        message: 'sucess'
+                    })
                 })
                 .catch(err => {
                     reject({
@@ -113,8 +112,7 @@ var relationRepository = {
                         message: err
                     })
                 })
-        });
-
+        })
     },
     getrelationbyid(relationid) {
         return new Promise((resolve, reject) => {

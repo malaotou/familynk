@@ -96,6 +96,7 @@ app.post('/relationV2', function (req, res) {
                   console.log(data2);
                   if (data2 == null) { // 未查看相关信息，读取图片信息
                     cb(null, {
+                      id:linkData._id,
                       name: linkData.name,
                       relation: node.relation,
                       birth: linkData.birth,
@@ -111,6 +112,7 @@ app.post('/relationV2', function (req, res) {
                     });
                   } else {
                     cb(null, {
+                      id:linkData._id,
                       name: linkData.name,
                       relation: node.relation,
                       birth: linkData.birth,
@@ -128,6 +130,7 @@ app.post('/relationV2', function (req, res) {
                 })
               } else { // 不存在最新文件
                 cb(null, {
+                  id:linkData._id,
                   name: linkData.name,
                   relation: node.relation,
                   birth: linkData.birth,
@@ -191,7 +194,9 @@ Update related user
 */
 app.post('/delete', function (req, res) {
   if (req.body != null && req.body.id != null) {
-
+    relationRepository.removeRelation(req.body.id, opuser)
+      .then(data => util.sendResponse(res, true, 'sucess', null))
+      .catch(err => util.sendResponse(res, false, err, null))
   }
 });
 
