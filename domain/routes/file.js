@@ -94,7 +94,9 @@ app.post('', function (req, res) {
   app.post('/allrelate', function (req, res) {
 
     photo.find({
-        uuid: $in(req.body.uuids) //req.body.uid
+        uuid: {
+          $in: req.body.uuids
+        } //req.body.uid
       }).sort({
         date: -1
       })
