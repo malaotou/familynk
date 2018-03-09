@@ -91,6 +91,20 @@ app.post('', function (req, res) {
         util.sendResponse(res, false, err, null);
       });
   }),
+  app.post('/allrelate', function (req, res) {
+
+    photo.find({
+        uuid: $in(req.body.uuids) //req.body.uid
+      }).sort({
+        date: -1
+      })
+      .then(data => {
+        util.sendResponse(res, true, 'sucess', data);
+      })
+      .catch(err => {
+        util.sendResponse(res, false, err, null);
+      });
+  }),
   app.post('/related', function (req, res) {
     if (req.body == null || req.body.uid == null || req.body.uid == "") {
       util.sendResponse(res, false, '参数uid 不能为空', null);
@@ -135,7 +149,7 @@ app.post('/readlogCreate', function (req, res) {
       } else {
 
       }
-      util.sendResponse(res,true,'sucess',null);
+      util.sendResponse(res, true, 'sucess', null);
     })
 })
 

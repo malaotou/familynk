@@ -195,7 +195,7 @@ Update related user
 app.post('/delete', function (req, res) {
   if (req.body != null && req.body.id != null) {
     relationRepository.removeRelation(req.body.id, req.body.opuser)
-      .then(data => util.sendResponse(res, true, 'sucess', null))
+      .then(data => util.sendResponse(res, true, 'sucess', 'null'))
       .catch(err => util.sendResponse(res, false, err, null))
   }
 });
