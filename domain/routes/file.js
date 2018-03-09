@@ -100,14 +100,18 @@ app.post('', function (req, res) {
         date: -1
       })
       .then(data => {
-        async.mapSeries(data.data, function (node, cb) {
+        async.mapSeries(data, function (node, cb) {
           userRepository.getuserById(node.uuid)
             .then(user => {
-              console.log(user,'user')
-              cb(Object.assign({}, node, {
-                avatarUrl: user.avatarUrl,
-                name: user.name
-              }))
+              console.log(user, 'user')
+              cb(null, {
+                images: node.images,
+                uuid: node.uuid,
+                date: node.date,
+                note:node.note,
+                avatarUrl: user.data==null?"":user.data.avatarUrl,
+                name: user.data==null?"":user.data.name
+              })
             })
         }, function (err, relults) {
           console.log(relults);
