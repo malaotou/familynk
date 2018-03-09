@@ -92,7 +92,6 @@ app.post('', function (req, res) {
       });
   }),
   app.post('/allrelate', function (req, res) {
-
     photo.find({
         uuid: {
           $in: req.body.uuids
@@ -101,7 +100,21 @@ app.post('', function (req, res) {
         date: -1
       })
       .then(data => {
-        util.sendResponse(res, true, 'sucess', data);
+        async.mapSeries(data.data, function (node, cb) {
+          userRepository.getuserById(node.uuid)
+            .then(user => {
+              console.log(user,'user')
+              cb(Object.assign({}, node, {
+                avatarUrl: user.avatarUrl,
+                name: user.name
+              }))
+            })
+        }, function (err, relults) {
+          console.log(relults);
+          util.sendResponse(res, true, 'sucess', relults);
+        })
+
+
       })
       .catch(err => {
         util.sendResponse(res, false, err, null);
